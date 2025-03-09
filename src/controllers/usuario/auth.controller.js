@@ -1,7 +1,7 @@
 import bcryptjs from 'bcryptjs'
 import { createAccessToken } from "../../libs/jwt.js";
 import { limpiaNumero } from "../../utils/formateo.js";
-import { verifyTurnstile } from "../../utils/recaptcha.api.js";
+import { verifyTurnstile } from "../../libs/verificarRecaptcha.js";
 import { sanitizeObject } from "../../libs/sanitize.js";
 import { logger } from "../../libs/logger.js";
 import { UserModel } from '../../models/usuario/user.model.js';
