@@ -1,7 +1,7 @@
 import bcryptjs from 'bcryptjs'
 import { createAccessToken } from "../../libs/jwt.js";
 import { limpiaNumero } from "../../utils/formateo.js";
-import { verifyTurnstile } from "../..//utils/recaptcha.api.js";
+import { verifyTurnstile } from "../../utils/recaptcha.api.js";
 import { sanitizeObject } from "../../libs/sanitize.js";
 import { logger } from "../../libs/logger.js";
 import { UserModel } from '../../models/usuario/user.model.js';
@@ -65,7 +65,7 @@ const crearUsuario = async (req, res) => {
 const Login = async (req, res) => {
     try {
         const { email, password,
-            // captchaToken 
+            captchaToken
         } = sanitizeObject(req.body);
 
         if (!email || !password) {
@@ -74,17 +74,18 @@ const Login = async (req, res) => {
                 msg: "elementos requeridos: usuario, correo y contraseña ",
             })
         }
+        const isCaptchaValid = verifyTurnstile(captchaToken)
+       
+        if (!isCaptchaValid) {
+            return res.status(400).json({ message: "Captcha inválido" });
+          }
 
         const user = await UserModel.buscaUnCorreo(email);
 
         if (!user) {
             return res.status(409).json({ ok: false, msg: "Correo no registrado" });
         }
-
-        // const isCaptchaValid = await verifyTurnstile(captchaToken);
-        // if (!isCaptchaValid) {
-        //     return res.status(400).json({ message: "Captcha inválido" });
-        // }
+       
         const isMatch = await bcryptjs.compare(password, user.contrasena)
 
         if (!isMatch) {
@@ -113,7 +114,6 @@ const Login = async (req, res) => {
             .status(200)
             .json({
                 token,
-                // captchaValid: isCaptchaValid
             });
     } catch (error) {
         logger.warn("Algo fallo, ", { error });
