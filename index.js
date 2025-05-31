@@ -18,8 +18,10 @@ import rentaRouter from "./src/routes/renta-venta-estadisticas/renta.routes.js";
 
 const app = express();
 
+const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
+
 app.use(cors({
-  origin: CORS_ORIGINS,
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
 }))
