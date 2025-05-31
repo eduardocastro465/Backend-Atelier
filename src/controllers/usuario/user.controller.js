@@ -32,6 +32,8 @@ const VerificaTipoRolAcceso = (req, res) => {
   });
 };
 
+
+
 export const UserController = {
   perfil,
 };

@@ -1,5 +1,6 @@
 import axios from "axios";
-import {  GOOGLE_RECAPTCHA_SECRET_KEY} from "../config.js";
+import { logger } from "../libs/logger.js";
+import { GOOGLE_RECAPTCHA_SECRET_KEY } from "../config.js";
 
 export const verifyTurnstile = async (captchaToken) => {
     try {
@@ -13,6 +14,7 @@ export const verifyTurnstile = async (captchaToken) => {
         });
         return response.data.success;
     } catch (error) {
+        console.log(error)
         logger.error("Error al verificar el CAPTCHA:", error.message);
         return false;
     }

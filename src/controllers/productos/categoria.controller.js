@@ -5,7 +5,7 @@ import { logger } from '../../libs/logger.js';
 const obtenerCategorias = async (req, res) => {
   try {
     const categorias = await CategoriaModel.obtenerCategorias();
-    res.status(200).json({ ok: true, categorias });
+    res.status(200).json(categorias);
   } catch (error) {
     logger.error("Error al obtener las categorías:", error);
     res.status(500).json({ ok: false, message: "Error interno del servidor", error: error.message });
@@ -32,18 +32,14 @@ const obtenerCategoriaPorId = async (req, res) => {
 const agregarCategoria = async (req, res) => {
   try {
 
-    const { categoria, descripcion } = sanitizeObject(req.body);
+    const { nombre } = sanitizeObject(req.body);
 
-    if (!categoria) {
+    if (!nombre) {
       return res.status(400).json({ message: "El nombre de la categoría es obligatorio." });
-    }
-    if (!descripcion) {
-      return res.status(400).json({ message: "La descripción de la categoría es obligatoria." });
     }
 
     const nuevaCategoria = await CategoriaModel.agregarCategoria({
-      categoria,
-      descripcion,
+      nombre
     });
 
     res.status(201).json({ ok: true, message: "Categoría creada con éxito", categoria: nuevaCategoria });
@@ -54,10 +50,53 @@ const agregarCategoria = async (req, res) => {
   }
 };
 
+//eliminar categoria
+const eliminarCategoria = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const categoriaEliminada = await CategoriaModel.eliminarCategoria(id);
+
+    if (!categoriaEliminada) {
+      return res.status(404).json({ ok: false, message: "Categoría no encontrada." });
+    }
+
+    res.status(200).json({ ok: true, message: "Categoría eliminada con éxito." });
+  } catch (error) {
+    logger.error("Error al eliminar la categoría:", error);
+    res.status(500).json({ ok: false, message: "Error interno del servidor", error: error.message });
+  }
+};
+
+//editar categoria
+const editarCategoria = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre } = sanitizeObject(req.body);
+
+    if (!nombre) {
+      return res.status(400).json({ message: "El nombre de la categoría es obligatorio." });
+    }
+
+    const categoriaActualizada = await CategoriaModel.editarCategoria({
+      id,
+      nombre
+    });
+
+    if (!categoriaActualizada) {
+      return res.status(404).json({ ok: false, message: "Categoría noencontrada." });
+    }
+    res.status(200).json({ ok: true, message: "Categoría actualizada con éxito.", categoria: categoriaActualizada });
+  } catch (error) {
+    logger.error("Error al eliminar la categoría:", error);
+    res.status(500).json({ ok: false, message: "Error interno del servidor", error: error.message });
+  }
+}
 
 export const CategoriaController = {
-  obtenerCategorias,obtenerCategoriaPorId,
+  obtenerCategorias,
+  obtenerCategoriaPorId,
   agregarCategoria,
-  // editarCategoria,eliminarCategoria,
+  editarCategoria,
+  eliminarCategoria,
 };

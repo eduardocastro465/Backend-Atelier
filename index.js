@@ -8,10 +8,13 @@ import { CORS_ORIGINS, API_VERSION, PORT } from "./src/config.js";
 import { logHttpRequest } from "./src/libs/logger.js";
 import userRouter from "./src/routes/usuario/user.routes.js";
 import authRouter from "./src/routes/usuario/auth.routes.js";
+import correoRouter from "./src/routes/correo/correo.route.js";
 import empresaRouter from "./src/routes/empresa/empresa.routes.js";
+import reseniaRouter from "./src/routes/empresa/resenia.routes.js";
 import vestidosRouter from "./src/routes/productos/vestidos.routes.js";
 import categoriaRouter from "./src/routes/productos/categoria.routes.js";
-
+import ventaRouter from "./src/routes/renta-venta-estadisticas/venta.routes.js";
+import rentaRouter from "./src/routes/renta-venta-estadisticas/renta.routes.js";
 
 const app = express();
 
@@ -65,12 +68,18 @@ app.use((req, res, next) => {
 });
 
 //rutas
-app.use(`/api/${API_VERSION}/users`, userRouter);
-app.use(`/api/${API_VERSION}/auth`, authRouter);
+
+app.use(`/api/${API_VERSION}/usuarios`, userRouter);
+app.use(`/api/${API_VERSION}/autentificacion`, authRouter);
+app.use(`/api/${API_VERSION}/notificaciones`, correoRouter);
 app.use(`/api/${API_VERSION}/empresa`, empresaRouter);
+app.use(`/api/${API_VERSION}/resenia`, reseniaRouter);
 app.use(`/api/${API_VERSION}/productos`, vestidosRouter);
 app.use(`/api/${API_VERSION}/categorias`, categoriaRouter);
+app.use(`/api/${API_VERSION}/rentas`, rentaRouter);
+app.use(`/api/${API_VERSION}/ventas`, ventaRouter);
 
-app.listen(PORT, () => {textoColorido([`🌎 Servidor corriendo en el puerto: ${PORT} 🖥`],
+app.listen(PORT, () => {
+  textoColorido([`🌎 Servidor corriendo en el puerto: ${PORT} 🖥`],
     ["rgb(33, 97, 235)", "rgb(46, 15, 183)"], modoProduction);
 });

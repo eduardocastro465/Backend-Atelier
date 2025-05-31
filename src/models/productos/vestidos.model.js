@@ -1,42 +1,38 @@
 import { db } from "../../database/db.js";
 
-const registrarVestido = async (vestidoData) => {
-  const {
-    nombre,
-    descripcion,
-    urlVestidoPrincipal,
-    otrasImagenesSubidas, // Array de otras imágenes (máximo 7)
-    color,
-    textura,
-    talla,
-    altura,
-    cintura,
-    precio,
-    estado,
-    nuevo,
-    categoria,
-  } = vestidoData;
-
-  //No registrado
+const registrarVestido = async ({
+  nombre,
+  color,
+  precioAnterior,
+  precioActual,
+  mostrarPrecioAnterior,
+  opcionesTipoTransaccion,
+  nuevo,
+  tipoCuello,
+  tipoCola,
+  tipoCapas,
+  tipoHombro,
+  descripcion,
+  idCategoria,
+  imagenes
+}) => {
 
   try {
-    // Insertar imágenes en tb/VestidosImagenes
-    const {
-      rows: [imagen],
-    } = await db.query(
+    // Insertar imágenes en tblVestidosImagenes
+    const { rows: [imagen] } = await db.query(
       `INSERT INTO "tblVestidosImagenes" (
-        "imagen1", "imagen2", "imagen3", "imagen4", 
+        "imagen1", "imagen2", "imagen3", "imagen4",
         "imagen5", "imagen6", "imagen7", "imagen8"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "idVestidosImagenes"`,
       [
-        urlVestidoPrincipal,
-        otrasImagenesSubidas[0] || "", // imagen2
-        otrasImagenesSubidas[1] || "", // imagen3
-        otrasImagenesSubidas[2] || "", // imagen4
-        otrasImagenesSubidas[3] || "", // imagen5
-        otrasImagenesSubidas[4] || "", // imagen6
-        otrasImagenesSubidas[5] || "", // imagen7
-        otrasImagenesSubidas[6] || "", // imagen8
+        imagenes[0] || "", // imagen2
+        imagenes[1] || "", // imagen3
+        imagenes[2] || "", // imagen4
+        imagenes[3] || "", // imagen5
+        imagenes[4] || "", // imagen6
+        imagenes[5] || "", // imagen7
+        imagenes[6] || "", // imagen8
+        imagenes[7] || "", // imagen8
       ]
     );
 
@@ -44,25 +40,32 @@ const registrarVestido = async (vestidoData) => {
     const {
       rows: [vestido],
     } = await db.query(
-      `INSERT INTO "tblVestidos" (
-        nombre, descripcion, color, textura, talla, altura_cm, cintura_cm, precio, 
-        estado, nuevo, "fechaDeCreacion", "idCategoriaVestidos", "idVestidosImagenes"
+      `INSERT INTO "tblProducto" (
+        nombre, descripcion, color,"precioAnterior", "precioActual","mostrarPrecioAnterior",
+        "opcionesTipoTransaccion", nuevo,    "tipoCuello",
+        "tipoCola",
+        "tipoCapas",
+        "tipoHombro", "idCategoria","idVestidosImagenes","
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11, $12) RETURNING *`,
       [
         nombre,
         descripcion,
         color,
-        textura,
-        talla,
-        altura,
-        cintura,
-        precio,
-        estado,
+        precioAnterior,
+        precioActual,
+        mostrarPrecioAnterior,
+        opcionesTipoTransaccion,
         nuevo,
-        categoria,
-        imagen.idVestidosImagenes, // ID de las imágenes insertadas
+        tipoCuello,
+        tipoCola,
+        tipoCapas,
+        tipoHombro,
+
+        idCategoria,
+        imagen.idVestidosImagenes,
       ]
     );
+
 
     return vestido;
   } catch (error) {

@@ -30,13 +30,13 @@ const obtenerCategoriaPorId = async (id) => {
   }
 };
 
-const agregarCategoria = async ({ categoria, descripcion }) => {
+const agregarCategoria = async ({ nombre }) => {
   try {
     const query = {
       text: `INSERT INTO "tblCategoriaVestidos" (
-              "categoria", "descripcion"
-            ) VALUES ($1, $2) RETURNING *`,
-      values: [categoria, descripcion],
+              "nombre"
+            ) VALUES ($1) RETURNING *`,
+      values: [nombre],
     };
 
     const { rows: [nuevaCategoria] } = await db.query(query);
@@ -48,14 +48,14 @@ const agregarCategoria = async ({ categoria, descripcion }) => {
   }
 };
 
-const editarCategoria = async ({ id, categoria, descripcion }) => {
+const editarCategoria = async ({ id, nombre }) => {
   try {
     const query = {
       text: `UPDATE "tblCategoriaVestidos"
-             SET "categoria" = $1, "descripcion" = $2
-             WHERE "idCategoriaVestidos" = $3
+             SET "nombre" = $1
+             WHERE "idCategoriaVestidos" = $2
              RETURNING *`,
-      values: [categoria, descripcion, id],
+      values: [nombre, id],
     };
 
     const { rows: [categoriaActualizada] } = await db.query(query);

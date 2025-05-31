@@ -14,78 +14,73 @@ const registrarVestido = async (req, res) => {
   try {
     let {
       nombre,
-      categoria,
       color,
-      textura,
-      talla,
-      altura,
-      cintura,
-      precio,
-      estado,
+      precioAnterior,
+      precioActual,
+      mostrarPrecioAnterior,
+      opcionesTipoTransaccion,
       nuevo,
+      tipoCuello,
+      tipoCola,
+      tipoCapas,
+      tipoHombro,
       descripcion,
+      idCategoria
     } = sanitizeObject(req.body);
+
 
     if (
       !req.files ||
-      !req.files.imagenPrincipal ||
-      req.files.imagenPrincipal.length === 0
+      !req.files.imagenes
     ) {
       return res
         .status(400)
-        .json({ message: "No se ha proporcionado una imagen principal." });
+        .json({ message: "No se ha proporcionado ninguna imagen." });
     }
 
 
-    const imagenPrincipalFile = req.files.imagenPrincipal?.path || req.files.imagenPrincipal?.tempFilePath ;
+    console.log("req.files", req.files);
+    let imagenes = [];
 
-    // Subir la imagen principal a Cloudinary
-    const imagenSubida = await uploadImage(imagenPrincipalFile,
-      {folder: process.env.CLOUDINARY_FOLDER_PRODUCTOS,
-      }
-    );
-    console.log(imagenSubida)
-    filesToDelete.push(imagenSubida); // Agregamos a la lista de eliminación
-
-    let otrasImagenesSubidas = [];
-
-    // Subir otras imágenes (si existen)
-    if (req.files.otrasImagenes && Array.isArray(req.files.otrasImagenes)) {
-      otrasImagenesSubidas = await uploadMultipleImages(
-        req.files.otrasImagenes,
+    // Subir otras imágenes
+    if (req.files.imagenes && Array.isArray(req.files.imagenes)) {
+      imagenes = await uploadMultipleImages(
+        req.files.imagenes,
         process.env.CLOUDINARY_FOLDER_PRODUCTOS
       );
-      filesToDelete.push(...otrasImagenesSubidas);
+      filesToDelete.push(...imagenes);
     }
-
-    altura = 10;
-    cintura = 10;
-    precio = 10;
-    nuevo = true;
-    // categoria = 1;
 
     // Registrar el producto en la base de datos
     const vestidoRegistrado = await VestidosModel.registrarVestido({
       nombre,
-      descripcion,
-      urlVestidoPrincipal: imagenSubida.secure_url,
-      otrasImagenesSubidas,
-      color,
-      textura,
       talla,
       altura,
       cintura,
-      precio,
-      estado,
+      color,
+      textura,
+      precioAnterior,
+      precioActual,
+      mostrarPrecioAnterior,
+      opcionesTipoTransaccion,
+      tipoCuello,
       nuevo,
-      categoria,
+      imagenes,
+      tipoCola,
+      tipoCapas,
+      tipoHombro,
+      descripcion,
+      idCategoria
     });
 
-    //Eliminar archivos temporales después de subirlos (lo que tiene la variable -> filesToDelete)
-    await deleteTempFiles(filesToDelete);
+    // //Eliminar archivos temporales después de subirlos (lo que tiene la variable -> filesToDelete)
+    // await deleteTempFiles(filesToDelete);
     res
       .status(201)
-      .json({ message: "Vestido resgistrado exitosamente", vestidoRegistrado });
+      .json({
+        message: "Vestido resgistrado exitosamente",
+        vestidoRegistrado
+      });
   } catch (error) {
     if (filesToDelete.length > 0) {
       await deleteTempFiles(filesToDelete); // Eliminar archivos temporales en caso de error

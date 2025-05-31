@@ -26,11 +26,11 @@ const obtenerPerfilEmpresaConRedesSociales = async () => {
                    LEFT JOIN "tblRedesSociales" rs ON de.id = rs.empresa_id`,
         };
         const { rows } = await db.query(query);
-  
+
         if (rows.length === 0) {
             throw new Error("Perfil de empresa no encontrado");
         }
-  
+
         const perfilEmpresa = {
             ...rows[0],
             redesSociales: rows.map(row => ({
@@ -39,13 +39,13 @@ const obtenerPerfilEmpresaConRedesSociales = async () => {
                 enlace: row.enlace,
             })),
         };
-  
+
         return perfilEmpresa;
     } catch (error) {
         console.error("Error al obtener el perfil de la empresa con redes sociales: ", error);
         throw new Error("Error al obtener el perfil de la empresa con redes sociales");
     }
-  };
+};
 
 const crearPerfilEmpresa = async ({ logo, slogan, nombre, direccion, correo, telefono }) => {
     try {

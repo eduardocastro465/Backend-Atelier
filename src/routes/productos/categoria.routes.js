@@ -3,14 +3,12 @@ import { CategoriaController } from "../../controllers/productos/categoria.contr
 
 const router = Router();
 
-router.get("/",CategoriaController.obtenerCategorias)
+router.get("/", CategoriaController.obtenerCategorias)
 
-router.get("/:id",CategoriaController.obtenerCategoriaPorId)
+router.get("/:id", CategoriaController.obtenerCategoriaPorId)
 
-router.post("/registrarCategoria", CategoriaController.agregarCategoria);
-
-// router.put("/actualizarCategoria/:id", CategoriaController.editarCategoria);
-
-// router.delete("/eliminarCategoria/:id", CategoriaController.eliminarCategoria);
+router.post("/", CategoriaController.agregarCategoria);
+router.put("/:id", CategoriaController.editarCategoria);
+router.delete("/:id", CategoriaController.eliminarCategoria);
 
 export default router;

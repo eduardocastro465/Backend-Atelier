@@ -7,6 +7,8 @@ export function limpiaNumero(phoneNumber) {
 }
 
 
+
+
 export function formatearFecha(fechaHora) {
   let horas = fechaHora.getHours();
   const minutos = String(fechaHora.getMinutes()).padStart(2, "0"); 

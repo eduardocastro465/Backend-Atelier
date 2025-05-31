@@ -3,13 +3,13 @@ import { VestidosController } from "../../controllers/productos/vestidos.control
 import fileUploadMiddleware  from "../../middlewares/fileUploadMiddleware.js";
 
 const router = Router();
-
+;
 router.get("/obtenerProductos", VestidosController.obtenerProductos);
 
 router.get("/obtenerProductoById/:id", VestidosController.obtenerProductoById);
 
 router.post(
-  "/registrarProducto",
+  "/",
   fileUploadMiddleware,
   VestidosController.registrarVestido
 );
