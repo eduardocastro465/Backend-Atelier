@@ -6,6 +6,7 @@ import {
   deleteTempFiles,
 } from "../../cloudinary/cloudinaryConfig.js";
 import { sanitizeObject } from "../../libs/sanitize.js";
+import { CLOUDINARY_FOLDER_PRODUCTOS, CLOUDINARY_FOLDER_ACCESORIOS } from "../../config.js";
 import { logger } from "../../libs/logger.js";
 
 const registrarVestido = async (req, res) => {
@@ -27,7 +28,7 @@ const registrarVestido = async (req, res) => {
       descripcion,
       idCategoria
     } = sanitizeObject(req.body);
-
+    console.log("req.body", req.files);
 
     if (
       !req.files ||
@@ -39,42 +40,44 @@ const registrarVestido = async (req, res) => {
     }
 
 
-    console.log("req.files", req.files);
+    //console.log("req.files", req.files);
     let imagenes = [];
 
     // Subir otras imágenes
-    if (req.files.imagenes && Array.isArray(req.files.imagenes)) {
+    if (req.files.imagenes) {
+
+      const archivos = Array.isArray(req.files.imagenes)
+        ? req.files.imagenes
+        : [req.files.imagenes];
+
       imagenes = await uploadMultipleImages(
-        req.files.imagenes,
-        process.env.CLOUDINARY_FOLDER_PRODUCTOS
+        archivos,
+        CLOUDINARY_FOLDER_PRODUCTOS
       );
       filesToDelete.push(...imagenes);
     }
+    console.log("imagenes", imagenes);
 
-    // Registrar el producto en la base de datos
+    //Registrar el producto en la base de datos
     const vestidoRegistrado = await VestidosModel.registrarVestido({
       nombre,
-      talla,
-      altura,
-      cintura,
       color,
-      textura,
       precioAnterior,
       precioActual,
       mostrarPrecioAnterior,
       opcionesTipoTransaccion,
-      tipoCuello,
       nuevo,
-      imagenes,
+      tipoCuello,
       tipoCola,
       tipoCapas,
       tipoHombro,
       descripcion,
-      idCategoria
+      idCategoriaVestidos: idCategoria = 8,
+      imagenes
     });
 
     // //Eliminar archivos temporales después de subirlos (lo que tiene la variable -> filesToDelete)
-    // await deleteTempFiles(filesToDelete);
+    await deleteTempFiles(filesToDelete);
     res
       .status(201)
       .json({
@@ -146,7 +149,7 @@ const actualizarVestido = async (req, res) => {
       const { secure_url } = await uploadImage(
         imagenPrincipalFile.path || imagenPrincipalFile.tempFilePath,
         {
-          folder: process.env.CLOUDINARY_FOLDER_PRODUCTOS,
+          folder: CLOUDINARY_FOLDER_PRODUCTOS,
         }
       );
       urlVestidoPrincipal = secure_url;
@@ -224,7 +227,7 @@ const desactivarVestido = async (req, res) => {
 const obtenerProductos = async (req, res) => {
   try {
     const productos = await VestidosModel.obtenerVestidos();
-    res.status(200).json({ productos });
+    res.status(200).json( productos );
   } catch (error) {
     logger.error("Error al obtener los productos:", error);
     res

@@ -13,9 +13,13 @@ const registrarVestido = async ({
   tipoCapas,
   tipoHombro,
   descripcion,
-  idCategoria,
+  idCategoriaVestidos,
   imagenes
 }) => {
+
+  console.log("imagenes", imagenes);
+  await db.query('BEGIN');
+
 
   try {
     // Insertar imágenes en tblVestidosImagenes
@@ -23,30 +27,33 @@ const registrarVestido = async ({
       `INSERT INTO "tblVestidosImagenes" (
         "imagen1", "imagen2", "imagen3", "imagen4",
         "imagen5", "imagen6", "imagen7", "imagen8"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "idVestidosImagenes"`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING "idVestidosImagenes"`,
       [
-        imagenes[0] || "", // imagen2
-        imagenes[1] || "", // imagen3
-        imagenes[2] || "", // imagen4
-        imagenes[3] || "", // imagen5
-        imagenes[4] || "", // imagen6
-        imagenes[5] || "", // imagen7
-        imagenes[6] || "", // imagen8
-        imagenes[7] || "", // imagen8
+        imagenes[0] || "",
+        imagenes[1] || "",
+        imagenes[2] || "",
+        imagenes[3] || "",
+        imagenes[4] || "",
+        imagenes[5] || "",
+        imagenes[6] || "",
+        imagenes[7] || ""
       ]
     );
+
 
     // Insertar el vestido en tblVestidos usando el idVestidosImag
     const {
       rows: [vestido],
     } = await db.query(
       `INSERT INTO "tblProducto" (
-        nombre, descripcion, color,"precioAnterior", "precioActual","mostrarPrecioAnterior",
-        "opcionesTipoTransaccion", nuevo,    "tipoCuello",
-        "tipoCola",
-        "tipoCapas",
-        "tipoHombro", "idCategoria","idVestidosImagenes","
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11, $12) RETURNING *`,
+  nombre, descripcion, color, "precioAnterior", "precioActual", "mostrarPrecioAnterior",
+  "opcionesTipoTransaccion", nuevo, "tipoCuello", "tipoCola", "tipoCapas", "tipoHombro",
+  "idCategoriaVestidos", "idVestidosImagenes"
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+) RETURNING *
+`,
       [
         nombre,
         descripcion,
@@ -60,15 +67,15 @@ const registrarVestido = async ({
         tipoCola,
         tipoCapas,
         tipoHombro,
-
-        idCategoria,
+        idCategoriaVestidos,
         imagen.idVestidosImagenes,
       ]
     );
 
-
+    await db.query('COMMIT'); // Confirmar la transacción
     return vestido;
   } catch (error) {
+    await db.query('ROLLBACK');
     console.error("Error al registrar el vestido:", error);
     throw new Error("Error al registrar el vestido");
   }
@@ -76,6 +83,9 @@ const registrarVestido = async ({
 
 const editarVestido = async (id, vestidoData) => {
   try {
+
+    await db.query('BEGIN');
+
     if (vestidoData.urlVestidoPrincipal || vestidoData.otrasImagenesSubidas) {
       const queryImagenes = {
         text: `UPDATE "tblVestidosImagenes"
@@ -98,40 +108,48 @@ const editarVestido = async (id, vestidoData) => {
 
       await db.query(queryImagenes);
     }
-    const query = {
-      text: `UPDATE "tblVestidos"
-             SET nombre = $1, descripcion = $2, 
-                 color = $3, textura = $4, talla = $5, altura_cm = $6, cintura_cm = $7,
-                 precio = $8, disponible = $9, nuevo = $10, "idCategoriaVestidos" = $11
-             WHERE "idVestido" = $12
-             RETURNING *`,
-      values: [
-        vestidoData.nombre,
-        vestidoData.descripcion,
-        vestidoData.color,
-        vestidoData.textura,
-        vestidoData.talla,
-        vestidoData.altura,
-        vestidoData.cintura,
-        vestidoData.precio,
-        vestidoData.estado,
-        vestidoData.nuevo,
-        vestidoData.categoria,
-        id,
-      ],
-    };
+    // 2. Insertar el vestido en tabla de productos
+    const { rows: [vestido] } = await db.query(
+      `INSERT INTO "tblProducto" (
+        nombre, descripcion, color, "precioAnterior", "precioActual", "mostrarPrecioAnterior",
+        "opcionesTipoTransaccion", nuevo, "tipoCuello", "tipoCola", "tipoCapas", "tipoHombro",
+        "idCategoriaVestidos", "idVestidosImagenes", "fechaRegistro"
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW()
+      ) RETURNING *`,
+      [
+        nombre,
+        descripcion,
+        color,
+        precioAnterior,
+        precioActual,
+        mostrarPrecioAnterior,
+        opcionesTipoTransaccion,
+        nuevo,
+        tipoCuello,
+        tipoCola,
+        tipoCapas,
+        tipoHombro,
+        idCategoriaVestidos,
+        imagen.idVestidosImagenes
+      ]
+    );
 
-    const {
-      rows: [vestidoActualizado],
-    } = await db.query(query);
-    return vestidoActualizado;
+    await db.query('COMMIT'); // Confirmar la transacción
+    return vestido;
+
   } catch (error) {
+    await db.query('ROLLBACK');
     console.error("Error al editar el vestido:", error);
     throw new Error("Error al editar el vestido");
   }
 };
 
 const eliminarVestido = async (id) => {
+
+  await db.query('BEGIN');
+
+
   try {
     const queryObtenerImagenes = {
       text: `SELECT "idVestidosImagenes" FROM "tblVestidos" WHERE "idVestido" = $1`,
@@ -173,9 +191,11 @@ const eliminarVestido = async (id) => {
       await db.query(queryActualizarAccesorio);
     }
 
+    await db.query('COMMIT'); // Confirmar la transacción
     await db.query(queryEliminarImagenes);
     return vestidoEliminado;
   } catch (error) {
+    await db.query('ROLLBACK');
     console.error("Error al eliminar el vestido:", error);
     throw new Error("Error al eliminar el vestido");
   }
@@ -183,14 +203,45 @@ const eliminarVestido = async (id) => {
 
 const obtenerVestidos = async () => {
   try {
-    const query = {
-      text: `SELECT * FROM "tblVestidos"`,
-    };
+    const { rows } = await db.query({
+      text: `
+        SELECT 
+          p."idProducto" AS _id,
+          p.nombre,
+          c.nombre AS categoria,
+          p.color,
+          p."opcionesTipoTransaccion",
+          p."precioActual",
+          p."precioAnterior",
+          p.disponible,
+          p.nuevo,
+       
+          p.altura,
+          p.cintura,
+          p.textura,
+          i.imagen1, i.imagen2, i.imagen3, i.imagen4,
+          i.imagen5, i.imagen6, i.imagen7, i.imagen8
+        FROM "tblProducto" p
+        JOIN "tblVestidosImagenes" i ON p."idVestidosImagenes" = i."idVestidosImagenes"
+        JOIN "tblCategoriaVestidos" c ON p."idCategoriaVestidos" = c."idCategoriaVestidos"
+      `
+    });
 
-    const { rows: vestidos } = await db.query(query);
-    return vestidos;
+    return rows.map(row => ({
+      ...row,
+      imagenes: [
+        row.imagen1, row.imagen2, row.imagen3, row.imagen4,
+        row.imagen5, row.imagen6, row.imagen7, row.imagen8
+      ].filter(Boolean),
+      precioAnterior: row.precioAnterior || undefined,
+      disponible: row.disponible ?? true,
+      talla: row.talla || undefined,
+      altura: row.altura || undefined,
+      cintura: row.cintura || undefined,
+      textura: row.textura || undefined
+    }));
   } catch (error) {
-    console.error("Error al obtener los vestidos:", error);
+    console.error("Error al obtener vestidos:", error);
     throw new Error("Error al obtener los vestidos");
   }
 };

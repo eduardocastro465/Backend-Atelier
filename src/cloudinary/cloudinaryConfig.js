@@ -10,6 +10,7 @@ cloudinary.config({
 });
 
 export const uploadImage = async (filePath, folder) => {
+  console.log("folder" + folder);
   try {
     const result = await cloudinary.uploader.upload(filePath, { folder });
     await fs.unlink(filePath); // Eliminar el archivo local después de subirlo
@@ -38,6 +39,7 @@ export const uploadMultipleImages = async (files, folder) => {
   if (!files || files.length === 0) {
       return [];
   }
+  console.log("folder" + folder);
   try {
       const uploadedImages = await Promise.all(
           files.map(async (file) => {

@@ -15,6 +15,7 @@ import vestidosRouter from "./src/routes/productos/vestidos.routes.js";
 import categoriaRouter from "./src/routes/productos/categoria.routes.js";
 import ventaRouter from "./src/routes/renta-venta-estadisticas/venta.routes.js";
 import rentaRouter from "./src/routes/renta-venta-estadisticas/renta.routes.js";
+import paypalRouter from "./src/routes/paypal/paypal.routes.js";
 
 const app = express();
 
@@ -80,6 +81,7 @@ app.use(`/api/${API_VERSION}/productos`, vestidosRouter);
 app.use(`/api/${API_VERSION}/categorias`, categoriaRouter);
 app.use(`/api/${API_VERSION}/rentas`, rentaRouter);
 app.use(`/api/${API_VERSION}/ventas`, ventaRouter);
+app.use(`/api/${API_VERSION}/paypal`, paypalRouter);
 
 app.listen(PORT, () => {
   textoColorido([`🌎 Servidor corriendo en el puerto: ${PORT} 🖥`],

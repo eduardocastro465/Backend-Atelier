@@ -42,6 +42,11 @@ export const CLOUDINARY_FOLDER_PRODUCTOS =
 export const CLOUDINARY_FOLDER_ACCESORIOS =
     process.env.CLOUDINARY_FOLDER_ACCESORIOS;
 
+
+export const PAYPAL_API_CLIENT = process.env.PAYPAL_API_CLIENT
+export const PAYPAL_API_SECRET = process.env.PAYPAL_API_SECRET
+
+
 // Claves VAPID
 export const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 export const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;

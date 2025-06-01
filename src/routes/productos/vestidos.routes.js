@@ -4,7 +4,7 @@ import fileUploadMiddleware  from "../../middlewares/fileUploadMiddleware.js";
 
 const router = Router();
 ;
-router.get("/obtenerProductos", VestidosController.obtenerProductos);
+router.get("/", VestidosController.obtenerProductos);
 
 router.get("/obtenerProductoById/:id", VestidosController.obtenerProductoById);
 
