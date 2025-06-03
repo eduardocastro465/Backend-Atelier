@@ -81,7 +81,21 @@ const registrarVestido = async ({
   }
 };
 
-const editarVestido = async (id, vestidoData) => {
+const editarVestido = async (id, {
+  nombre,
+  color,
+  precioAnterior,
+  precioActual,
+  mostrarPrecioAnterior,
+  opcionesTipoTransaccion,
+  nuevo,
+  tipoCuello,
+  tipoCola,
+  tipoCapas,
+  tipoHombro,
+  descripcion,
+  idCategoriaVestidos: idCategoria,
+  imagenes }) => {
   try {
 
     await db.query('BEGIN');

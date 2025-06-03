@@ -39,8 +39,6 @@ const registrarVestido = async (req, res) => {
         .json({ message: "No se ha proporcionado ninguna imagen." });
     }
 
-
-    //console.log("req.files", req.files);
     let imagenes = [];
 
     // Subir otras imágenes
@@ -58,6 +56,10 @@ const registrarVestido = async (req, res) => {
     }
     console.log("imagenes", imagenes);
 
+    if (idCategoria === null) {
+      idCategoria = 8
+    }
+
     //Registrar el producto en la base de datos
     const vestidoRegistrado = await VestidosModel.registrarVestido({
       nombre,
@@ -72,7 +74,7 @@ const registrarVestido = async (req, res) => {
       tipoCapas,
       tipoHombro,
       descripcion,
-      idCategoriaVestidos: idCategoria = 8,
+      idCategoriaVestidos: idCategoria,
       imagenes
     });
 
@@ -114,73 +116,57 @@ const actualizarVestido = async (req, res) => {
 
   try {
     const { id } = req.params;
-    // const id = 5;
-    // const categoria = 1;
-    // const cintura = 10;
-    // const precio = 10;
-    // const altura = 10;
-    //nuevo = true;
 
     const {
       nombre,
-      categoria,
-      cintura,
-      precio,
-      altura,
       color,
-      textura,
-      talla,
-      estado,
+      precioAnterior,
+      precioActual,
+      mostrarPrecioAnterior,
+      opcionesTipoTransaccion,
       nuevo,
-      // : nuevoRaw = true
+      tipoCuello,
+      tipoCola,
+      tipoCapas,
+      tipoHombro,
       descripcion,
-      idVestidosImagenes,
-      // : idVestidosImagenesRaw = 3
+      idCategoria
     } = sanitizeObject(req.body);
 
-    // const idVestidosImagenes = parseInt(idVestidosImagenesRaw);
 
-    let urlVestidoPrincipal;
-    let otrasImagenesSubidas = [];
+    let imagenes = [];
 
-    // Subir la nueva imagen principal si se proporciona
-    if (req.files?.imagenPrincipal) {
-      const imagenPrincipalFile = req.files.imagenPrincipal;
-      const { secure_url } = await uploadImage(
-        imagenPrincipalFile.path || imagenPrincipalFile.tempFilePath,
-        {
-          folder: CLOUDINARY_FOLDER_PRODUCTOS,
-        }
+    // Subir otras imágenes
+    if (req.files.imagenes) {
+
+      const archivos = Array.isArray(req.files.imagenes)
+        ? req.files.imagenes
+        : [req.files.imagenes];
+
+      imagenes = await uploadMultipleImages(
+        archivos,
+        CLOUDINARY_FOLDER_PRODUCTOS
       );
-      urlVestidoPrincipal = secure_url;
-      filesToDelete.push(imagenPrincipalFile);
+      filesToDelete.push(...imagenes);
     }
-
-    // Subir otras imágenes si se proporcionan
-    if (req.files?.otrasImagenes && Array.isArray(req.files.otrasImagenes)) {
-      otrasImagenesSubidas = await uploadMultipleImages(
-        req.files.otrasImagenes,
-        process.env.CLOUDINARY_FOLDER_PRODUCTOS
-      );
-      filesToDelete.push(...req.files.otrasImagenes);
-    }
+    console.log("imagenes", imagenes);
 
     // Actualizar el producto en la base de datos
     const vestidoActualizado = await VestidosModel.editarVestido(id, {
       nombre,
-      descripcion,
-      urlVestidoPrincipal,
-      otrasImagenesSubidas,
       color,
-      textura,
-      talla,
-      altura,
-      cintura,
-      precio,
-      estado,
+      precioAnterior,
+      precioActual,
+      mostrarPrecioAnterior,
+      opcionesTipoTransaccion,
       nuevo,
-      categoria,
-      idVestidosImagenes,
+      tipoCuello,
+      tipoCola,
+      tipoCapas,
+      tipoHombro,
+      descripcion,
+      idCategoriaVestidos: idCategoria,
+      imagenes
     });
 
     if (!vestidoActualizado) {
@@ -227,7 +213,7 @@ const desactivarVestido = async (req, res) => {
 const obtenerProductos = async (req, res) => {
   try {
     const productos = await VestidosModel.obtenerVestidos();
-    res.status(200).json( productos );
+    res.status(200).json(productos);
   } catch (error) {
     logger.error("Error al obtener los productos:", error);
     res

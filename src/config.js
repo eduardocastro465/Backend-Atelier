@@ -1,5 +1,6 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import { config } from 'dotenv';
+
+config();
 
 //Conexion a postgres
 export const DB_USER = process.env.DB_USER;
@@ -43,9 +44,10 @@ export const CLOUDINARY_FOLDER_ACCESORIOS =
     process.env.CLOUDINARY_FOLDER_ACCESORIOS;
 
 
+// Configuración de PayPal
 export const PAYPAL_API_CLIENT = process.env.PAYPAL_API_CLIENT
 export const PAYPAL_API_SECRET = process.env.PAYPAL_API_SECRET
-
+export const PAYPAL_API = process.env.PAYPAL_API;
 
 // Claves VAPID
 export const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
